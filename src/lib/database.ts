@@ -25,7 +25,22 @@ interface ChatMessage {
 }
 
 const dbPath = path.join(process.cwd(), 'diet.db')
-const db = new Database(dbPath)
+
+// Ensure database is opened with write permissions
+let db: Database.Database
+try {
+  db = new Database(dbPath, { 
+    fileMustExist: false,
+    readonly: false
+  })
+  
+  // Test write access
+  db.pragma('journal_mode = WAL')
+  console.log('Database opened successfully with write access')
+} catch (error) {
+  console.error('Failed to open database with write access:', error)
+  throw error
+}
 
 // Initialize database tables
 export function initDatabase() {
