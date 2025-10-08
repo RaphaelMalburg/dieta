@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { saveChatMessage, getChatMessages, getUserByUsername, getDietPlan } from '@/lib/database'
+import { prisma } from '@/lib/prisma'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
@@ -15,7 +15,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const user = getUserByUsername(username)
+    const user = await prisma.user.findUnique({
+      where: { username },
+      include: { dietPlan: true }
+    })
+    
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -24,15 +28,24 @@ export async function POST(request: NextRequest) {
     }
 
     // Save user message
-    saveChatMessage(user.id, 'user', message)
+    await prisma.chatMessage.create({
+      data: {
+        userId: user.id,
+        role: 'user',
+        content: message
+      }
+    })
 
     // Get user's diet plan for context
-    const dietPlan = getDietPlan(user.id)
-    const dietContext = dietPlan?.content || 'No diet plan available'
+    const dietContext = user.dietPlan?.content || 'No diet plan available'
 
     // Get recent chat history for context
-    const recentMessages = getChatMessages(user.id, 10)
-    const chatHistory = recentMessages.map(msg => `${msg.role}: ${msg.content}`).join('\n')
+    const recentMessages = await prisma.chatMessage.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'desc' },
+      take: 10
+    })
+    const chatHistory = recentMessages.reverse().map(msg => `${msg.role}: ${msg.content}`).join('\n')
 
     // Create the prompt with diet context
     const prompt = `You are a helpful diet assistant. You have access to the user's diet plan and should provide advice based on it.
@@ -54,7 +67,13 @@ Please provide helpful advice about diet substitutions, meal planning, or nutrit
     const aiMessage = response.text()
 
     // Save AI response
-    saveChatMessage(user.id, 'assistant', aiMessage)
+    await prisma.chatMessage.create({
+      data: {
+        userId: user.id,
+        role: 'assistant',
+        content: aiMessage
+      }
+    })
 
     return NextResponse.json({
       success: true,
@@ -81,7 +100,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const user = getUserByUsername(username)
+    const user = await prisma.user.findUnique({
+      where: { username }
+    })
+    
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -89,7 +111,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const messages = getChatMessages(user.id)
+    const messages = await prisma.chatMessage.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'asc' }
+    })
 
     return NextResponse.json({
       success: true,

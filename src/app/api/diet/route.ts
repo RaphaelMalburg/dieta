@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { saveDietPlan, getDietPlan, getUserByUsername } from '@/lib/database'
+import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +12,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const user = getUserByUsername(username)
+    const user = await prisma.user.findUnique({
+      where: { username }
+    })
+    
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -20,7 +23,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = saveDietPlan(user.id, content)
+    await prisma.dietPlan.upsert({
+      where: { userId: user.id },
+      update: { content },
+      create: {
+        userId: user.id,
+        content
+      }
+    })
 
     return NextResponse.json({
       success: true,
@@ -47,7 +57,11 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const user = getUserByUsername(username)
+    const user = await prisma.user.findUnique({
+      where: { username },
+      include: { dietPlan: true }
+    })
+    
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -55,11 +69,9 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const dietPlan = getDietPlan(user.id)
-
     return NextResponse.json({
       success: true,
-      dietPlan: dietPlan?.content || ''
+      dietPlan: user.dietPlan?.content || ''
     })
   } catch (error) {
     console.error('Diet get error:', error)

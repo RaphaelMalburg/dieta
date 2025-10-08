@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getUserByCredentials } from '@/lib/database'
+import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +12,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const user = getUserByCredentials(username, password)
+    const user = await prisma.user.findFirst({
+      where: {
+        username: username,
+        password: password
+      }
+    })
 
     if (!user) {
       return NextResponse.json(
