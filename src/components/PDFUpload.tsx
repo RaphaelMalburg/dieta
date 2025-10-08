@@ -26,9 +26,23 @@ export default function PDFUpload({ onPDFExtracted, username }: PDFUploadProps) 
     setFileName(file.name)
 
     try {
+      // Debug logging
+      console.log('PDFUpload Debug:', {
+        file: file ? { name: file.name, type: file.type, size: file.size } : null,
+        username: username,
+        usernameType: typeof username,
+        usernameLength: username?.length
+      })
+
       const formData = new FormData()
       formData.append('file', file)
       formData.append('username', username)
+
+      // Log FormData contents
+      console.log('FormData contents:')
+      for (const [key, value] of formData.entries()) {
+        console.log(`${key}:`, value)
+      }
 
       const response = await fetch('/api/pdf-upload', {
         method: 'POST',

@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { LogOut, Upload, MessageCircle, FileText } from 'lucide-react'
 import PDFUpload from '@/components/PDFUpload'
+import DietPlanDisplay from '@/components/DietPlanDisplay'
 
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState('')
@@ -208,61 +209,99 @@ Possible substitutions:
           </TabsList>
 
           <TabsContent value="tainara" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Tainara&apos;s Diet Plan
-                </CardTitle>
-                <CardDescription>
-                  Upload your PDF diet plan or enter it manually
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <PDFUpload 
-                  onPDFExtracted={(text) => handlePDFExtracted(text, 'tainara')} 
-                  username="tainara" 
-                />
-                <Textarea
-                  value={tainaraDiet}
-                  onChange={(e) => setTainaraDiet(e.target.value)}
-                  placeholder="Enter diet plan here or upload a PDF..."
-                  className="min-h-[200px]"
-                />
-                <Button onClick={() => handleDietSave('tainara', tainaraDiet)}>
-                  Save Diet Plan
-                </Button>
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Input Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Upload className="w-5 h-5" />
+                    Upload & Edit Diet Plan
+                  </CardTitle>
+                  <CardDescription>
+                    Upload your PDF diet plan or enter it manually
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <PDFUpload 
+                    onPDFExtracted={(text) => handlePDFExtracted(text, 'tainara')} 
+                    username="tainara" 
+                  />
+                  <Textarea
+                    value={tainaraDiet}
+                    onChange={(e) => setTainaraDiet(e.target.value)}
+                    placeholder="Enter diet plan here or upload a PDF..."
+                    className="min-h-[200px]"
+                  />
+                  <Button onClick={() => handleDietSave('tainara', tainaraDiet)}>
+                    Save Diet Plan
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Diet Display Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    Tainara&apos;s Diet Plan
+                  </CardTitle>
+                  <CardDescription>
+                    Your organized diet plan overview
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <DietPlanDisplay dietPlan={tainaraDiet} />
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="raphael" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Raphael&apos;s Diet Plan
-                </CardTitle>
-                <CardDescription>
-                  Upload your PDF diet plan or enter it manually
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <PDFUpload 
-                  onPDFExtracted={(text) => handlePDFExtracted(text, 'raphael')} 
-                  username="raphael" 
-                />
-                <Textarea
-                  value={raphaelDiet}
-                  onChange={(e) => setRaphaelDiet(e.target.value)}
-                  placeholder="Enter diet plan here or upload a PDF..."
-                  className="min-h-[200px]"
-                />
-                <Button onClick={() => handleDietSave('raphael', raphaelDiet)}>
-                  Save Diet Plan
-                </Button>
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Input Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Upload className="w-5 h-5" />
+                    Upload & Edit Diet Plan
+                  </CardTitle>
+                  <CardDescription>
+                    Upload your PDF diet plan or enter it manually
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <PDFUpload 
+                    onPDFExtracted={(text) => handlePDFExtracted(text, 'raphael')} 
+                    username="raphael" 
+                  />
+                  <Textarea
+                    value={raphaelDiet}
+                    onChange={(e) => setRaphaelDiet(e.target.value)}
+                    placeholder="Enter diet plan here or upload a PDF..."
+                    className="min-h-[200px]"
+                  />
+                  <Button onClick={() => handleDietSave('raphael', raphaelDiet)}>
+                    Save Diet Plan
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Diet Display Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    Raphael&apos;s Diet Plan
+                  </CardTitle>
+                  <CardDescription>
+                    Your organized diet plan overview
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <DietPlanDisplay dietPlan={raphaelDiet} />
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
 

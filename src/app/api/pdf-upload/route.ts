@@ -10,7 +10,24 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File
     const username = formData.get('username') as string
 
+    // Debug logging
+    console.log('API Debug - Received data:', {
+      file: file ? { name: file.name, type: file.type, size: file.size } : null,
+      username: username,
+      usernameType: typeof username,
+      usernameValue: JSON.stringify(username),
+      formDataKeys: Array.from(formData.keys()),
+      allFormData: Object.fromEntries(formData.entries())
+    })
+
     if (!file || !username) {
+      console.log('Validation failed:', { 
+        fileExists: !!file, 
+        usernameExists: !!username,
+        usernameEmpty: username === '',
+        usernameNull: username === null,
+        usernameUndefined: username === undefined
+      })
       return NextResponse.json(
         { success: false, error: 'File and username are required' },
         { status: 400 }
