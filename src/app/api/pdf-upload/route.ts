@@ -49,18 +49,35 @@ export async function POST(request: NextRequest) {
     // Use Gemini to parse and structure the PDF content
     const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || 'gemini-2.0-flash' })
     
-    const prompt = `You are a diet plan extraction specialist. Please analyze this PDF document and extract all diet-related information in a clear, structured format.
+    const prompt = `Você é um especialista em extração de planos alimentares. Por favor, analise este documento PDF e extraia todas as informações relacionadas à dieta em um formato claro e estruturado em português.
 
-Please organize the extracted content as follows:
-1. **Meals**: Breakfast, Lunch, Dinner, Snacks (if mentioned)
-2. **Food Items**: List all foods with quantities/portions
-3. **Substitutions**: Any alternative foods mentioned
-4. **Instructions**: Special preparation notes or timing
-5. **Restrictions**: Any dietary restrictions or notes
+Por favor, organize o conteúdo extraído da seguinte forma:
 
-Format the output in a clean, readable way that a person can easily follow as their diet plan. If the PDF contains non-diet content, focus only on the nutritional and meal planning information.
+**Refeições:**
+- **Café da Manhã**: [liste todos os alimentos e quantidades]
+- **Lanche da Manhã**: [se mencionado, liste todos os alimentos e quantidades]
+- **Almoço**: [liste todos os alimentos e quantidades]
+- **Lanche da Tarde**: [se mencionado, liste todos os alimentos e quantidades]
+- **Jantar**: [liste todos os alimentos e quantidades]
+- **Ceia**: [se mencionado, liste todos os alimentos e quantidades]
 
-If the PDF appears to be corrupted or contains no diet-related content, please indicate that clearly.`
+**Substituições:**
+[Liste todas as substituições alimentares mencionadas]
+
+**Instruções:**
+[Notas especiais de preparo, horários ou orientações]
+
+**Restrições:**
+[Qualquer restrição alimentar ou observação importante]
+
+IMPORTANTE: 
+- Identifique TODAS as refeições mencionadas no PDF, mesmo que tenham nomes diferentes (ex: "lanche", "merenda", "colação", etc.)
+- Mantenha as quantidades e porções exatas como descritas
+- Use formatação clara com marcadores para facilitar a leitura
+- Se o PDF contém conteúdo não relacionado à dieta, foque apenas nas informações nutricionais e de planejamento alimentar
+- Responda sempre em português brasileiro
+
+Se o PDF parecer corrompido ou não contiver conteúdo relacionado à dieta, indique isso claramente em português.`
 
     const result = await model.generateContent([
       {

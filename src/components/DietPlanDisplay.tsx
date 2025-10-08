@@ -26,8 +26,8 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
         <CardContent className="flex items-center justify-center h-48 text-gray-500">
           <div className="text-center">
             <Utensils className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p>No diet plan uploaded yet</p>
-            <p className="text-sm">Upload a PDF or enter manually above</p>
+            <p>Nenhum plano alimentar carregado ainda</p>
+            <p className="text-sm">Faça upload de um PDF ou digite manualmente acima</p>
           </div>
         </CardContent>
       </Card>
@@ -58,28 +58,45 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
     for (const line of lines) {
       const trimmedLine = line.trim()
       
-      // Check for section headers
-      if (trimmedLine.toLowerCase().includes('**meals**') || 
+      // Check for section headers (Portuguese and English)
+      if (trimmedLine.toLowerCase().includes('**refeições**') || 
+          trimmedLine.toLowerCase().includes('refeições:') ||
+          trimmedLine.toLowerCase().includes('**meals**') || 
           trimmedLine.toLowerCase().includes('meals:')) {
         currentSection = 'meals'
         continue
-      } else if (trimmedLine.toLowerCase().includes('**substitution') || 
+      } else if (trimmedLine.toLowerCase().includes('**substituições**') ||
+                 trimmedLine.toLowerCase().includes('substituições:') ||
+                 trimmedLine.toLowerCase().includes('**substitution') || 
                  trimmedLine.toLowerCase().includes('substitution')) {
         currentSection = 'substitutions'
         continue
-      } else if (trimmedLine.toLowerCase().includes('**instruction') || 
+      } else if (trimmedLine.toLowerCase().includes('**instruções**') ||
+                 trimmedLine.toLowerCase().includes('instruções:') ||
+                 trimmedLine.toLowerCase().includes('**instruction') || 
                  trimmedLine.toLowerCase().includes('instruction')) {
         currentSection = 'instructions'
         continue
-      } else if (trimmedLine.toLowerCase().includes('**restriction') || 
+      } else if (trimmedLine.toLowerCase().includes('**restrições**') ||
+                 trimmedLine.toLowerCase().includes('restrições:') ||
+                 trimmedLine.toLowerCase().includes('**restriction') || 
                  trimmedLine.toLowerCase().includes('restriction')) {
         currentSection = 'restrictions'
         continue
       }
 
-      // Check for meal headers
-      const mealMatch = trimmedLine.match(/\*\*(breakfast|lunch|dinner|snacks?)\*\*:?/i)
+      // Check for meal headers (Portuguese and English)
+      const mealMatch = trimmedLine.match(/\*\*(café da manhã|lanche da manhã|almoço|lanche da tarde|jantar|ceia|breakfast|lunch|dinner|snacks?)\*\*:?/i)
       if (mealMatch || 
+          trimmedLine.toLowerCase().startsWith('café da manhã') ||
+          trimmedLine.toLowerCase().startsWith('lanche da manhã') ||
+          trimmedLine.toLowerCase().startsWith('almoço') ||
+          trimmedLine.toLowerCase().startsWith('lanche da tarde') ||
+          trimmedLine.toLowerCase().startsWith('jantar') ||
+          trimmedLine.toLowerCase().startsWith('ceia') ||
+          trimmedLine.toLowerCase().startsWith('lanche') ||
+          trimmedLine.toLowerCase().startsWith('merenda') ||
+          trimmedLine.toLowerCase().startsWith('colação') ||
           trimmedLine.toLowerCase().startsWith('breakfast') ||
           trimmedLine.toLowerCase().startsWith('lunch') ||
           trimmedLine.toLowerCase().startsWith('dinner') ||
@@ -89,10 +106,10 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
         if (currentMeal && currentContent.length > 0) {
           const getMealIcon = (mealName: string) => {
             const name = mealName.toLowerCase()
-            if (name.includes('breakfast') || name.includes('café') || name.includes('morning')) return Coffee
-            if (name.includes('lunch') || name.includes('almoço') || name.includes('noon')) return Sun
-            if (name.includes('dinner') || name.includes('jantar') || name.includes('evening')) return Moon
-            if (name.includes('snack') || name.includes('lanche') || name.includes('afternoon')) return Sunset
+            if (name.includes('café da manhã') || name.includes('breakfast') || name.includes('café') || name.includes('morning')) return Coffee
+            if (name.includes('almoço') || name.includes('lunch') || name.includes('noon')) return Sun
+            if (name.includes('jantar') || name.includes('dinner') || name.includes('evening')) return Moon
+            if (name.includes('lanche') || name.includes('merenda') || name.includes('colação') || name.includes('ceia') || name.includes('snack') || name.includes('afternoon')) return Sunset
             return Utensils
           }
           
@@ -136,10 +153,10 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
     if (currentMeal && currentContent.length > 0) {
       const getMealIcon = (mealName: string) => {
         const name = mealName.toLowerCase()
-        if (name.includes('breakfast') || name.includes('café') || name.includes('morning')) return Coffee
-        if (name.includes('lunch') || name.includes('almoço') || name.includes('noon')) return Sun
-        if (name.includes('dinner') || name.includes('jantar') || name.includes('evening')) return Moon
-        if (name.includes('snack') || name.includes('lanche') || name.includes('afternoon')) return Sunset
+        if (name.includes('café da manhã') || name.includes('breakfast') || name.includes('café') || name.includes('morning')) return Coffee
+        if (name.includes('almoço') || name.includes('lunch') || name.includes('noon')) return Sun
+        if (name.includes('jantar') || name.includes('dinner') || name.includes('evening')) return Moon
+        if (name.includes('lanche') || name.includes('merenda') || name.includes('colação') || name.includes('ceia') || name.includes('snack') || name.includes('afternoon')) return Sunset
         return Utensils
       }
       
@@ -162,7 +179,7 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-green-700 flex items-center gap-2">
             <ChefHat className="h-5 w-5" />
-            Daily Meals
+            Refeições Diárias
           </h3>
           <div className="grid gap-4 md:grid-cols-2">
             {sections.meals.map((meal, index) => {
@@ -204,7 +221,7 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2 text-blue-700">
               <RefreshCw className="h-4 w-4 text-blue-600" />
-              Food Substitutions
+              Substituições
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -228,7 +245,7 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2 text-orange-700">
               <Clock className="h-4 w-4" />
-              Instructions & Timing
+              Instruções e Horários
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -250,7 +267,7 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2 text-red-700">
               <AlertTriangle className="h-4 w-4 text-red-600" />
-              Dietary Restrictions
+              Restrições Dietéticas
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -270,7 +287,7 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
       {sections.other.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Additional Information</CardTitle>
+            <CardTitle className="text-base">Informações Adicionais</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-sm space-y-1">
