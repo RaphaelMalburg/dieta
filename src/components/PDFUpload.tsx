@@ -27,7 +27,7 @@ export default function PDFUpload({ onPDFExtracted, username }: PDFUploadProps) 
 
     try {
       const formData = new FormData()
-      formData.append('pdf', file)
+      formData.append('file', file)
       formData.append('username', username)
 
       const response = await fetch('/api/pdf-upload', {
