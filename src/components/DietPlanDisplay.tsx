@@ -10,7 +10,9 @@ import {
   Utensils,
   RefreshCw,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  Clock,
+  ChefHat
 } from 'lucide-react'
 
 interface DietPlanDisplayProps {
@@ -53,15 +55,6 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
     let currentMeal = ''
     let currentContent: string[] = []
 
-    const getMealIcon = (mealName: string) => {
-      const name = mealName.toLowerCase()
-      if (name.includes('breakfast') || name.includes('café') || name.includes('morning')) return Coffee
-      if (name.includes('lunch') || name.includes('almoço') || name.includes('noon')) return Sun
-      if (name.includes('dinner') || name.includes('jantar') || name.includes('evening')) return Moon
-      if (name.includes('snack') || name.includes('lanche') || name.includes('afternoon')) return Sunset
-      return Utensils
-    }
-
     for (const line of lines) {
       const trimmedLine = line.trim()
       
@@ -94,11 +87,19 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
         
         // Save previous meal if exists
         if (currentMeal && currentContent.length > 0) {
-          const mealKey = currentMeal.toLowerCase() as keyof typeof mealIcons
+          const getMealIcon = (mealName: string) => {
+            const name = mealName.toLowerCase()
+            if (name.includes('breakfast') || name.includes('café') || name.includes('morning')) return Coffee
+            if (name.includes('lunch') || name.includes('almoço') || name.includes('noon')) return Sun
+            if (name.includes('dinner') || name.includes('jantar') || name.includes('evening')) return Moon
+            if (name.includes('snack') || name.includes('lanche') || name.includes('afternoon')) return Sunset
+            return Utensils
+          }
+          
           sections.meals.push({
             title: currentMeal,
             content: currentContent.join('\n'),
-            icon: mealIcons[mealKey] || Utensils
+            icon: getMealIcon(currentMeal)
           })
         }
         
@@ -133,11 +134,19 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
 
     // Save last meal if exists
     if (currentMeal && currentContent.length > 0) {
-      const mealKey = currentMeal.toLowerCase() as keyof typeof mealIcons
+      const getMealIcon = (mealName: string) => {
+        const name = mealName.toLowerCase()
+        if (name.includes('breakfast') || name.includes('café') || name.includes('morning')) return Coffee
+        if (name.includes('lunch') || name.includes('almoço') || name.includes('noon')) return Sun
+        if (name.includes('dinner') || name.includes('jantar') || name.includes('evening')) return Moon
+        if (name.includes('snack') || name.includes('lanche') || name.includes('afternoon')) return Sunset
+        return Utensils
+      }
+      
       sections.meals.push({
         title: currentMeal,
         content: currentContent.join('\n'),
-        icon: mealIcons[mealKey] || Utensils
+        icon: getMealIcon(currentMeal)
       })
     }
 

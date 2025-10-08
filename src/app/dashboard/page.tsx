@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { LogOut, Upload, MessageCircle, FileText } from 'lucide-react'
 import PDFUpload from '@/components/PDFUpload'
@@ -108,34 +107,7 @@ export default function Dashboard() {
     }
   }
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, user: string) => {
-    const file = event.target.files?.[0]
-    if (!file) return
 
-    if (file.type === 'application/pdf') {
-      // For now, we'll just show a placeholder for PDF content
-      // In a real implementation, you'd use pdf-parse here
-      const placeholderText = `PDF content for ${user} would be extracted here. 
-      
-This is where your nutritionist's diet plan would appear after PDF processing.
-
-Example diet content:
-- Breakfast: 2 slices whole grain bread, 1 egg, 1 cup coffee
-- Snack: 1 apple or 3 crackers
-- Lunch: 150g grilled chicken, 100g rice, salad
-- Snack: 1 yogurt or handful of nuts
-- Dinner: 120g fish, 150g vegetables, 80g pasta
-
-Possible substitutions:
-- 2 slices bread = 80g cooked rice
-- 100g rice = 100g pasta
-- 1 apple = 3 crackers`
-
-      handleDietSave(user, placeholderText)
-    } else {
-      alert('Please upload a PDF file')
-    }
-  }
 
   const sendMessage = async () => {
     if (!currentMessage.trim()) return
