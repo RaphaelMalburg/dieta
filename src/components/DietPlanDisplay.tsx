@@ -1,8 +1,6 @@
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import GeneralInfoCard from './GeneralInfoCard'
 import MealCard from './MealCard'
 import RestrictionCard from './RestrictionCard'
@@ -143,7 +141,14 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
 
       {/* Instructions Section */}
       {structuredData.instrucoes_gerais && structuredData.instrucoes_gerais.length > 0 && (
-        <InstructionCard instrucoes={structuredData.instrucoes_gerais} />
+        <InstructionCard instrucoes={
+          structuredData.instrucoes_gerais.flatMap(item => 
+            item.instrucoes.map(instrucao => ({
+              tipo: item.categoria,
+              descricao: instrucao
+            }))
+          )
+        } />
       )}
 
       {/* Restrictions Section */}
