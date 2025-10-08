@@ -1,0 +1,50 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="#10b981"/>
+  
+  <!-- Plate/Bowl -->
+  <circle cx="256" cy="280" r="140" fill="#ffffff" stroke="#e5e7eb" stroke-width="4"/>
+  
+  <!-- Food items on plate -->
+  <!-- Salad leaves -->
+  <ellipse cx="220" cy="260" rx="25" ry="15" fill="#22c55e" transform="rotate(-20 220 260)"/>
+  <ellipse cx="240" cy="245" rx="20" ry="12" fill="#16a34a" transform="rotate(15 240 245)"/>
+  <ellipse cx="200" cy="280" rx="18" ry="10" fill="#22c55e" transform="rotate(-45 200 280)"/>
+  
+  <!-- Protein (meat/fish) -->
+  <ellipse cx="280" cy="270" rx="30" ry="20" fill="#f97316" transform="rotate(10 280 270)"/>
+  <ellipse cx="285" cy="275" rx="25" ry="15" fill="#ea580c"/>
+  
+  <!-- Vegetables -->
+  <circle cx="230" cy="300" r="12" fill="#ef4444"/>
+  <circle cx="250" cy="310" r="10" fill="#eab308"/>
+  <circle cx="270" cy="300" r="8" fill="#f97316"/>
+  
+  <!-- Grains/Carbs -->
+  <ellipse cx="300" cy="250" rx="20" ry="8" fill="#fbbf24" transform="rotate(25 300 250)"/>
+  <ellipse cx="310" cy="260" rx="15" ry="6" fill="#f59e0b" transform="rotate(45 310 260)"/>
+  
+  <!-- Fork and Knife -->
+  <!-- Fork -->
+  <rect x="180" y="180" width="4" height="60" fill="#6b7280" transform="rotate(-30 182 210)"/>
+  <rect x="176" y="175" width="2" height="8" fill="#6b7280" transform="rotate(-30 177 179)"/>
+  <rect x="180" y="175" width="2" height="8" fill="#6b7280" transform="rotate(-30 181 179)"/>
+  <rect x="184" y="175" width="2" height="8" fill="#6b7280" transform="rotate(-30 185 179)"/>
+  <rect x="188" y="175" width="2" height="8" fill="#6b7280" transform="rotate(-30 189 179)"/>
+  
+  <!-- Knife -->
+  <rect x="320" y="180" width="4" height="60" fill="#6b7280" transform="rotate(30 322 210)"/>
+  <polygon points="318,175 326,175 324,165 320,165" fill="#9ca3af" transform="rotate(30 322 170)"/>
+  
+  <!-- Nutrition symbols -->
+  <!-- Vitamin symbol (small plus) -->
+  <rect x="160" y="320" width="12" height="3" fill="#ffffff" rx="1"/>
+  <rect x="164" y="316" width="3" height="12" fill="#ffffff" rx="1"/>
+  
+  <!-- Calorie symbol (flame-like) -->
+  <path d="M350 320 C355 315, 365 315, 365 325 C365 335, 355 340, 350 335 C345 330, 345 325, 350 320 Z" fill="#ffffff"/>
+  
+  <!-- App title area -->
+  <rect x="100" y="80" width="312" height="60" fill="rgba(255,255,255,0.9)" rx="30"/>
+  <text x="256" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#10b981">Diet Manager</text>
+</svg>
