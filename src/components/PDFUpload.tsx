@@ -15,6 +15,8 @@ export default function PDFUpload({ onPDFExtracted, username }: PDFUploadProps) 
   const [fileName, setFileName] = useState('')
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("=== File Upload Started ===")
+    
     const file = event.target.files?.[0]
     if (!file || file.type !== 'application/pdf') {
       alert('Please select a PDF file')
@@ -25,23 +27,9 @@ export default function PDFUpload({ onPDFExtracted, username }: PDFUploadProps) 
     setFileName(file.name)
 
     try {
-      // Debug logging
-      console.log('PDFUpload Debug:', {
-        file: file ? { name: file.name, type: file.type, size: file.size } : null,
-        username: username,
-        usernameType: typeof username,
-        usernameLength: username?.length
-      })
-
       const formData = new FormData()
       formData.append('file', file)
       formData.append('username', username)
-
-      // Log FormData contents
-      console.log('FormData contents:')
-      for (const [key, value] of formData.entries()) {
-        console.log(`${key}:`, value)
-      }
 
       const response = await fetch('/api/pdf-upload', {
         method: 'POST',
@@ -49,11 +37,26 @@ export default function PDFUpload({ onPDFExtracted, username }: PDFUploadProps) 
       })
 
       const data = await response.json()
+      
+      console.log('=== PDFUpload Debug ===')
+      console.log('Response status:', response.status)
+      console.log('Response ok:', response.ok)
+      console.log('Response data:', data)
+      console.log('Data success:', data.success)
+      console.log('Data structuredData:', data.structuredData)
+      console.log('Data text:', data.text)
 
       if (response.ok && data.success) {
-        onPDFExtracted(data.text)
+        // Pass the structured data as JSON string if available, otherwise fallback to text
+        const contentToPass = data.structuredData ? JSON.stringify(data.structuredData) : data.text
+        console.log('Content to pass to onPDFExtracted:', contentToPass)
+        console.log('Content type:', typeof contentToPass)
+        console.log('Content length:', contentToPass.length)
+        
+        onPDFExtracted(contentToPass)
         alert('PDF uploaded and processed successfully!')
       } else {
+        console.error('PDF upload failed:', data.error)
         alert(data.error || 'Failed to process PDF')
       }
     } catch (error) {

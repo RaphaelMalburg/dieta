@@ -23,9 +23,8 @@ export default function Dashboard() {
 
   const loadDietPlans = async () => {
     try {
+      // Load Tainara's diet plan
       const tainaraResponse = await fetch('/api/diet?username=tainara')
-      const raphaelResponse = await fetch('/api/diet?username=raphael')
-      
       if (tainaraResponse.ok) {
         const tainaraData = await tainaraResponse.json()
         if (tainaraData.success && tainaraData.dietPlan) {
@@ -33,6 +32,8 @@ export default function Dashboard() {
         }
       }
       
+      // Load Raphael's diet plan
+      const raphaelResponse = await fetch('/api/diet?username=raphael')
       if (raphaelResponse.ok) {
         const raphaelData = await raphaelResponse.json()
         if (raphaelData.success && raphaelData.dietPlan) {
@@ -44,13 +45,44 @@ export default function Dashboard() {
     }
   }
 
-  const handlePDFExtracted = (text: string, username: string) => {
-    if (username === 'tainara') {
-      setTainaraDiet(text)
-      localStorage.setItem('tainaraDiet', text)
-    } else if (username === 'raphael') {
-      setRaphaelDiet(text)
-      localStorage.setItem('raphaelDiet', text)
+  const handlePDFExtracted = async (text: string, username: string) => {
+    console.log('=== Dashboard handlePDFExtracted Debug ===')
+    console.log('Received text:', text)
+    console.log('Text type:', typeof text)
+    console.log('Text length:', text.length)
+    console.log('Username:', username)
+    
+    try {
+      // Save directly to database
+      const response = await fetch('/api/diet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          content: text
+        })
+      })
+
+      if (response.ok) {
+        console.log('Database save successful, updating local state...')
+        // Update local state
+        if (username === 'tainara') {
+          setTainaraDiet(text)
+          console.log('Updated tainaraDiet state with:', text.substring(0, 100) + '...')
+        } else if (username === 'raphael') {
+          setRaphaelDiet(text)
+          console.log('Updated raphaelDiet state with:', text.substring(0, 100) + '...')
+        }
+        alert('PDF uploaded and saved successfully!')
+      } else {
+        console.error('Database save failed:', response.status)
+        alert('Failed to save PDF data')
+      }
+    } catch (error) {
+      console.error('Error saving PDF data:', error)
+      alert('Error saving PDF data')
     }
   }
 
@@ -81,7 +113,46 @@ export default function Dashboard() {
   }
 
   const handleDietSave = async (user: string, diet: string) => {
+    if (!diet.trim()) {
+      alert('Please enter some diet plan content')
+      return
+    }
+
     try {
+      let contentToSave = diet.trim()
+
+      // Check if it's already JSON (from PDF upload)
+      let isJSON = false
+      try {
+        JSON.parse(contentToSave)
+        isJSON = true
+      } catch {
+        // Not JSON, process with AI
+      }
+
+      // If it's plain text, process it with AI
+      if (!isJSON) {
+        try {
+          const processResponse = await fetch('/api/process-text', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: contentToSave })
+          })
+
+          if (processResponse.ok) {
+            const processData = await processResponse.json()
+            if (processData.success && processData.structuredData) {
+              contentToSave = JSON.stringify(processData.structuredData)
+            }
+          }
+        } catch (processError) {
+          console.error('AI processing failed:', processError)
+        }
+      }
+
+      // Save to database
       const response = await fetch('/api/diet', {
         method: 'POST',
         headers: {
@@ -89,20 +160,21 @@ export default function Dashboard() {
         },
         body: JSON.stringify({
           username: user,
-          content: diet
+          content: contentToSave
         })
       })
 
       if (response.ok) {
-        localStorage.setItem(`${user}Diet`, diet)
-        if (user === 'tainara') setTainaraDiet(diet)
-    else setRaphaelDiet(diet)
+        // Update local state
+        if (user === 'tainara') setTainaraDiet(contentToSave)
+        else setRaphaelDiet(contentToSave)
+        
         alert('Diet plan saved successfully!')
       } else {
         alert('Failed to save diet plan')
       }
     } catch (error) {
-      console.error('Error saving diet:', error)
+      console.error('Error saving diet plan:', error)
       alert('Error saving diet plan')
     }
   }

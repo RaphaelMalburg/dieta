@@ -1,103 +1,122 @@
 'use client'
 
-import { Card, CardContent } from '@/components/ui/card'
-import { Utensils } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import GeneralInfoCard from './GeneralInfoCard'
 import MealCard from './MealCard'
+import RestrictionCard from './RestrictionCard'
 import SubstitutionCard from './SubstitutionCard'
 import InstructionCard from './InstructionCard'
-import RestrictionCard from './RestrictionCard'
-import GeneralInfoCard from './GeneralInfoCard'
 
 interface DietPlanDisplayProps {
   dietPlan: string
 }
 
-interface Alimento {
-  item: string
-  quantidade: string
-  observacoes?: string
-}
-
-interface OpcaoRefeicao {
-  numero: number
-  alimentos: Alimento[]
-}
-
-interface Refeicao {
-  nome: string
-  horario?: string
-  opcoes: OpcaoRefeicao[]
-}
-
-interface Instrucao {
-  tipo: string
-  descricao: string
-}
-
-interface Substituicao {
-  alimento_original: string
-  substitutos: string[]
-  descricao?: string
-}
-
-interface Restricao {
-  tipo: string
-  descricao: string
-}
-
-interface InformacoesGerais {
-  calorias_diarias?: string
-  macronutrientes?: string
-  suplementacao?: string
-}
-
 interface StructuredDietData {
+  informacoes_gerais?: {
+    calorias_diarias?: string
+    macronutrientes?: string
+    suplementacao?: string
+  }
+  refeicoes?: Array<{
+    nome: string
+    horario?: string
+    opcoes: Array<{
+      numero: number
+      alimentos: Array<{
+        item: string
+        quantidade: string
+        observacoes?: string
+      }>
+    }>
+  }>
+  restricoes?: Array<{
+    tipo: string
+    descricao: string
+  }>
+  substituicoes?: Array<{
+    alimento_original: string
+    substitutos: string[]
+  }>
+  instrucoes_gerais?: Array<{
+    categoria: string
+    instrucoes: string[]
+  }>
   erro?: string
-  informacoes_gerais?: InformacoesGerais
-  refeicoes?: Refeicao[]
-  substituicoes?: Substituicao[]
-  instrucoes?: Instrucao[]
-  restricoes?: Restricao[]
 }
 
 export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
-  if (!dietPlan || dietPlan.trim() === '') {
+  console.log('=== DietPlanDisplay Debug ===')
+  console.log('dietPlan received:', dietPlan)
+  console.log('dietPlan type:', typeof dietPlan)
+  console.log('dietPlan length:', dietPlan?.length)
+  console.log('dietPlan first 100 chars:', dietPlan?.substring(0, 100))
+
+  // Handle empty or null diet plan
+  if (!dietPlan || dietPlan.trim().length === 0) {
+    console.log('No diet plan provided, showing empty state')
     return (
       <Card className="h-full">
-        <CardContent className="flex items-center justify-center h-48 text-gray-500">
-          <div className="text-center">
-            <Utensils className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p>Nenhum plano alimentar carregado ainda</p>
-            <p className="text-sm">Faça upload de um PDF ou digite manualmente acima</p>
-          </div>
+        <CardContent className="p-6">
+          <p className="text-gray-500">No diet plan available</p>
         </CardContent>
       </Card>
     )
   }
 
-  // Try to parse as structured JSON data first
   let structuredData: StructuredDietData
+
   try {
-    structuredData = JSON.parse(dietPlan)
-  } catch {
-    // Fallback to legacy text parsing if JSON parsing fails
-    return renderLegacyTextFormat(dietPlan)
+    console.log('Attempting to parse as JSON...')
+    // Clean and parse the JSON data
+    const cleanedData = dietPlan.trim()
+    structuredData = JSON.parse(cleanedData)
+    console.log('JSON parsing successful!')
+    console.log('Parsed data:', structuredData)
+    console.log('Parsed data type:', typeof structuredData)
+    
+    // Validate that we have the expected structure
+    if (!structuredData || typeof structuredData !== 'object') {
+      throw new Error('Invalid data structure')
+    }
+    
+  } catch (error) {
+    console.log('JSON parsing failed:', error)
+    console.log('Falling back to raw text display')
+    // If JSON parsing fails, display as raw text
+    return (
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle>Diet Plan</CardTitle>
+          <CardDescription>Raw content (JSON parsing failed)</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <pre className="whitespace-pre-wrap text-sm bg-gray-50 p-4 rounded-lg overflow-auto max-h-96">
+            {dietPlan}
+          </pre>
+        </CardContent>
+      </Card>
+    )
   }
 
-  // Check if it's an error response
+  // Check for error in the data
   if (structuredData.erro) {
     return (
       <Card className="h-full">
-        <CardContent className="flex items-center justify-center h-48 text-gray-500">
-          <div className="text-center">
-            <Utensils className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p>{structuredData.erro}</p>
-          </div>
+        <CardContent className="p-6">
+          <p className="text-red-500">Error: {structuredData.erro}</p>
         </CardContent>
       </Card>
     )
   }
 
+  console.log('Data has expected structure, rendering structured components')
+  console.log('Has informacoes_gerais:', !!structuredData.informacoes_gerais)
+  console.log('Has refeicoes:', !!structuredData.refeicoes)
+  console.log('Refeicoes is array:', Array.isArray(structuredData.refeicoes))
+
+  // Render structured diet plan with beautiful components
   return (
     <div className="w-full overflow-hidden space-y-6">
       {/* General Information */}
@@ -110,7 +129,7 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Refeições Diárias</h2>
           <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
-            {structuredData.refeicoes.map((refeicao: Refeicao, index: number) => (
+            {structuredData.refeicoes.map((refeicao, index) => (
               <MealCard key={index} refeicao={refeicao} />
             ))}
           </div>
@@ -123,8 +142,8 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
       )}
 
       {/* Instructions Section */}
-      {structuredData.instrucoes && structuredData.instrucoes.length > 0 && (
-        <InstructionCard instrucoes={structuredData.instrucoes} />
+      {structuredData.instrucoes_gerais && structuredData.instrucoes_gerais.length > 0 && (
+        <InstructionCard instrucoes={structuredData.instrucoes_gerais} />
       )}
 
       {/* Restrictions Section */}
@@ -132,18 +151,5 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
         <RestrictionCard restricoes={structuredData.restricoes} />
       )}
     </div>
-  )
-}
-
-// Fallback function for legacy text format
-function renderLegacyTextFormat(dietPlan: string) {
-  return (
-    <Card className="w-full">
-      <CardContent className="p-6">
-        <div className="whitespace-pre-wrap text-sm text-gray-700">
-          {dietPlan}
-        </div>
-      </CardContent>
-    </Card>
   )
 }
