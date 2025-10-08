@@ -2,16 +2,11 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { 
   Coffee, 
   Sun, 
   Sunset, 
   Moon, 
-  Apple, 
-  Clock, 
-  AlertCircle,
-  ChefHat,
   Utensils,
   RefreshCw,
   AlertTriangle,
@@ -19,12 +14,11 @@ import {
 } from 'lucide-react'
 
 interface DietPlanDisplayProps {
-  content: string
-  username: string
+  dietPlan: string
 }
 
-export default function DietPlanDisplay({ content, username }: DietPlanDisplayProps) {
-  if (!content || content.trim() === '') {
+export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
+  if (!dietPlan || dietPlan.trim() === '') {
     return (
       <Card className="h-full">
         <CardContent className="flex items-center justify-center h-48 text-gray-500">
@@ -39,9 +33,15 @@ export default function DietPlanDisplay({ content, username }: DietPlanDisplayPr
   }
 
   // Parse the content to identify different sections
-  const parseContent = (text: string) => {
-    const sections = {
-      meals: [] as Array<{ title: string, content: string, icon: any }>,
+  const parseContent = (text: string): {
+     meals: Array<{ title: string; content: string; icon: React.ComponentType<{ className?: string }> }>;
+     substitutions: string[];
+     instructions: string[];
+     restrictions: string[];
+     other: string[];
+   } => {
+     const sections = {
+       meals: [] as Array<{ title: string, content: string, icon: React.ComponentType<{ className?: string }> }>,
       substitutions: [] as string[],
       instructions: [] as string[],
       restrictions: [] as string[],
@@ -53,21 +53,13 @@ export default function DietPlanDisplay({ content, username }: DietPlanDisplayPr
     let currentMeal = ''
     let currentContent: string[] = []
 
-    const mealIcons = {
-      breakfast: Coffee,
-      lunch: Sun,
-      dinner: Moon,
-      snack: Sunset,
-      snacks: Sunset
-    }
-
     const getMealIcon = (mealName: string) => {
       const name = mealName.toLowerCase()
-      if (name.includes('breakfast') || name.includes('café') || name.includes('morning')) return <Coffee className="w-4 h-4 text-amber-600" />
-      if (name.includes('lunch') || name.includes('almoço') || name.includes('noon')) return <Sun className="w-4 h-4 text-yellow-500" />
-      if (name.includes('dinner') || name.includes('jantar') || name.includes('evening')) return <Moon className="w-4 h-4 text-indigo-600" />
-      if (name.includes('snack') || name.includes('lanche') || name.includes('afternoon')) return <Sunset className="w-4 h-4 text-orange-500" />
-      return <Utensils className="w-4 h-4 text-gray-600" />
+      if (name.includes('breakfast') || name.includes('café') || name.includes('morning')) return Coffee
+      if (name.includes('lunch') || name.includes('almoço') || name.includes('noon')) return Sun
+      if (name.includes('dinner') || name.includes('jantar') || name.includes('evening')) return Moon
+      if (name.includes('snack') || name.includes('lanche') || name.includes('afternoon')) return Sunset
+      return Utensils
     }
 
     for (const line of lines) {
@@ -152,7 +144,7 @@ export default function DietPlanDisplay({ content, username }: DietPlanDisplayPr
     return sections
   }
 
-  const sections = parseContent(content)
+  const sections = parseContent(dietPlan)
 
   return (
     <div className="space-y-6">
@@ -170,7 +162,7 @@ export default function DietPlanDisplay({ content, username }: DietPlanDisplayPr
                 <Card key={index} className="border-l-4 border-l-green-500 bg-gray-50">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base font-semibold flex items-center gap-2 capitalize">
-                      {getMealIcon(meal.title)}
+                      <IconComponent className="w-4 h-4 text-amber-600" />
                       <span className="capitalize">{meal.title}</span>
                     </CardTitle>
                   </CardHeader>
