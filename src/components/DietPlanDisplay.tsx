@@ -12,6 +12,54 @@ interface DietPlanDisplayProps {
   dietPlan: string
 }
 
+interface Alimento {
+  item: string
+  quantidade: string
+  observacoes?: string
+}
+
+interface OpcaoRefeicao {
+  numero: number
+  alimentos: Alimento[]
+}
+
+interface Refeicao {
+  nome: string
+  horario?: string
+  opcoes: OpcaoRefeicao[]
+}
+
+interface Instrucao {
+  tipo: string
+  descricao: string
+}
+
+interface Substituicao {
+  alimento_original: string
+  substitutos: string[]
+  descricao?: string
+}
+
+interface Restricao {
+  tipo: string
+  descricao: string
+}
+
+interface InformacoesGerais {
+  calorias_diarias?: string
+  macronutrientes?: string
+  suplementacao?: string
+}
+
+interface StructuredDietData {
+  erro?: string
+  informacoes_gerais?: InformacoesGerais
+  refeicoes?: Refeicao[]
+  substituicoes?: Substituicao[]
+  instrucoes?: Instrucao[]
+  restricoes?: Restricao[]
+}
+
 export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
   if (!dietPlan || dietPlan.trim() === '') {
     return (
@@ -28,10 +76,10 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
   }
 
   // Try to parse as structured JSON data first
-  let structuredData
+  let structuredData: StructuredDietData
   try {
     structuredData = JSON.parse(dietPlan)
-  } catch (error) {
+  } catch {
     // Fallback to legacy text parsing if JSON parsing fails
     return renderLegacyTextFormat(dietPlan)
   }
@@ -62,7 +110,7 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Refeições Diárias</h2>
           <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
-            {structuredData.refeicoes.map((refeicao: any, index: number) => (
+            {structuredData.refeicoes.map((refeicao: Refeicao, index: number) => (
               <MealCard key={index} refeicao={refeicao} />
             ))}
           </div>
