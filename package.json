@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@langchain/core": "^0.3.78",
+    "@langchain/google-genai": "^0.2.18",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-label": "^2.1.7",
@@ -24,6 +26,7 @@
     "better-sqlite3": "^12.4.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "langchain": "^0.3.35",
     "lucide-react": "^0.545.0",
     "next": "15.5.4",
     "react": "19.1.0",

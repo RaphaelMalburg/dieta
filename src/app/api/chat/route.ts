@@ -1,8 +1,94 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai'
+import { ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate } from '@langchain/core/prompts'
+import { StringOutputParser } from '@langchain/core/output_parsers'
 import { prisma } from '@/lib/prisma'
+import { foodSwapCalculator } from '@/lib/foodSwapUtils'
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+const model = new ChatGoogleGenerativeAI({
+  model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+  apiKey: process.env.GEMINI_API_KEY!,
+  temperature: 0.3, // Lower temperature for more consistent, objective responses
+})
+
+const outputParser = new StringOutputParser()
+
+// System prompt template for food swap recommendations
+const systemPrompt = SystemMessagePromptTemplate.fromTemplate(`
+Você é um assistente especializado em substituições alimentares baseadas em calorias. Suas respostas devem ser:
+
+1. **OBJETIVAS**: Forneça informações factuais sobre calorias e nutrição
+2. **BASEADAS EM DADOS**: Use apenas informações nutricionais verificáveis
+3. **SEGURAS**: Nunca dê conselhos médicos específicos ou recomendações para condições de saúde
+4. **FOCADAS EM CALORIAS**: Priorize equivalências calóricas nas substituições
+
+**REGRAS IMPORTANTES:**
+- Sempre mencione que as informações são apenas educativas
+- Sugira consultar um nutricionista para orientações personalizadas
+- Forneça quantidades específicas em gramas
+- Inclua informações sobre proteínas, carboidratos e gorduras quando relevante
+- Mantenha respostas concisas (máximo 200 palavras)
+
+**FORMATO DE RESPOSTA PARA SUBSTITUIÇÕES:**
+- Alimento original: [nome] ([quantidade]g = [calorias] kcal)
+- Substituição sugerida: [nome] ([quantidade]g = [calorias] kcal)
+- Diferença nutricional: [proteínas/carboidratos/gorduras]
+
+Plano alimentar do usuário:
+{dietPlan}
+
+Histórico da conversa:
+{chatHistory}
+`)
+
+const humanPrompt = HumanMessagePromptTemplate.fromTemplate(`{message}`)
+
+const chatPrompt = ChatPromptTemplate.fromMessages([
+  systemPrompt,
+  humanPrompt
+])
+
+const chain = chatPrompt.pipe(model).pipe(outputParser)
+
+// Function to detect if message is asking for food swaps
+function isFoodSwapQuery(message: string): boolean {
+  const swapKeywords = [
+    'substituir', 'trocar', 'substituição', 'troca', 'equivalente',
+    'similar', 'parecido', 'mesmo valor', 'mesma caloria', 'swap',
+    'alternativa', 'opção', 'pode comer', 'no lugar de'
+  ]
+  
+  const messageWords = message.toLowerCase()
+  return swapKeywords.some(keyword => messageWords.includes(keyword))
+}
+
+// Function to extract food names and quantities from message
+function extractFoodInfo(message: string): { food: string; quantity?: number } | null {
+  // Simple regex to find food mentions with quantities
+  const patterns = [
+    /(\d+)\s*g?\s+de\s+([a-záàâãéêíóôõúç\s]+)/gi,
+    /([a-záàâãéêíóôõúç\s]+)\s+(\d+)\s*g/gi,
+    /(\d+)\s*gramas?\s+de\s+([a-záàâãéêíóôõúç\s]+)/gi
+  ]
+  
+  for (const pattern of patterns) {
+    const match = pattern.exec(message)
+    if (match) {
+      const quantity = parseInt(match[1])
+      const food = match[2].trim()
+      return { food, quantity }
+    }
+  }
+  
+  // If no quantity found, try to extract just food name
+  const foodPattern = /(?:substituir|trocar|no lugar de)\s+([a-záàâãéêíóôõúç\s]+)/gi
+  const foodMatch = foodPattern.exec(message)
+  if (foodMatch) {
+    return { food: foodMatch[1].trim() }
+  }
+  
+  return null
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,34 +123,60 @@ export async function POST(request: NextRequest) {
     })
 
     // Get user's diet plan for context
-    const dietContext = user.dietPlan?.content || 'No diet plan available'
+    const dietContext = user.dietPlan?.content || 'Nenhum plano alimentar disponível'
 
     // Get recent chat history for context
     const recentMessages = await prisma.chatMessage.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: 'desc' },
-      take: 10
+      take: 6 // Reduced for more focused context
     })
-    const chatHistory = recentMessages.reverse().map(msg => `${msg.role}: ${msg.content}`).join('\n')
+    const chatHistory = recentMessages.reverse()
+      .map(msg => `${msg.role === 'user' ? 'Usuário' : 'Assistente'}: ${msg.content}`)
+      .join('\n')
 
-    // Create the prompt with diet context
-    const prompt = `You are a helpful diet assistant. You have access to the user's diet plan and should provide advice based on it.
+    let aiMessage = ''
 
-User's Diet Plan:
-${dietContext}
+    // Check if this is a food swap query
+    if (isFoodSwapQuery(message)) {
+      const foodInfo = extractFoodInfo(message)
+      
+      if (foodInfo) {
+        const { food, quantity = 100 } = foodInfo
+        
+        try {
+          // Try to find food swaps using our calculator
+          const swaps = await foodSwapCalculator.suggestSwaps(food, quantity)
+          
+          if (swaps.length > 0) {
+            const originalFood = await foodSwapCalculator.getNutritionInfo(food)
+            const originalCalories = originalFood ? Math.round((originalFood.calories_per_100g * quantity) / 100) : 'N/A'
+            
+            let swapResponse = `**Substituições para ${food} (${quantity}g = ${originalCalories} kcal):**\n\n`
+            
+            swaps.forEach((swap, index) => {
+              swapResponse += `${index + 1}. **${swap.food}** - ${swap.quantity}g (${swap.category})\n`
+              swapResponse += `   • Calorias: ${swap.calories} kcal\n\n`
+            })
+            
+            swapResponse += `*Informações apenas educativas. Consulte um nutricionista para orientações personalizadas.*`
+            aiMessage = swapResponse
+          }
+        } catch (error) {
+          console.error('Error getting food swaps:', error)
+          // Fall through to general AI response
+        }
+      }
+    }
 
-Recent conversation:
-${chatHistory}
-
-User's current question: ${message}
-
-Please provide helpful advice about diet substitutions, meal planning, or nutritional guidance based on the user's diet plan. Keep responses concise and practical. If suggesting substitutions, try to maintain similar nutritional values.`
-
-    // Generate response using Gemini
-    const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || 'gemini-2.0-flash' })
-    const result = await model.generateContent(prompt)
-    const response = result.response
-    const aiMessage = response.text()
+    // If no specific food swap was found, use LangChain for general response
+    if (!aiMessage) {
+      aiMessage = await chain.invoke({
+        dietPlan: dietContext,
+        chatHistory: chatHistory,
+        message: message
+      })
+    }
 
     // Save AI response
     await prisma.chatMessage.create({

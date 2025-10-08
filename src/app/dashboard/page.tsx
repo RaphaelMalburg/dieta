@@ -354,11 +354,19 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MessageCircle className="w-5 h-5" />
-              Diet Assistant Chat
+              Food Swap Assistant
             </CardTitle>
             <CardDescription>
-              Ask questions about diet substitutions and modifications
+              Get objective calorie-based food substitutions. Information is educational only - consult a nutritionist for personalized advice.
             </CardDescription>
+            <div className="mt-2 p-3 bg-blue-50 rounded-md">
+              <p className="text-sm text-blue-800 font-medium mb-1">💡 Try asking:</p>
+              <ul className="text-xs text-blue-700 space-y-1">
+                <li>• &quot;Posso substituir 100g de arroz branco por algo?&quot;</li>
+                <li>• &quot;O que posso comer no lugar de 150g de batata?&quot;</li>
+                <li>• &quot;Alternativas para 200g de peito de frango&quot;</li>
+              </ul>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="h-64 overflow-y-auto border rounded-md p-4 space-y-3">
@@ -377,7 +385,7 @@ export default function Dashboard() {
                     }`}
                   >
                     <p className="text-sm font-medium mb-1">
-                      {message.role === 'user' ? 'You' : 'Diet Assistant'}
+                      {message.role === 'user' ? 'Você' : 'Food Swap Assistant'}
                     </p>
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                   </div>
@@ -385,8 +393,8 @@ export default function Dashboard() {
               )}
               {isLoading && (
                 <div className="bg-gray-100 mr-auto max-w-[80%] p-3 rounded-lg">
-                  <p className="text-sm font-medium mb-1">Diet Assistant</p>
-                  <p className="text-sm">Thinking...</p>
+                  <p className="text-sm font-medium mb-1">Food Swap Assistant</p>
+                  <p className="text-sm">Calculando substituições...</p>
                 </div>
               )}
             </div>
@@ -394,7 +402,7 @@ export default function Dashboard() {
               <Input
                 value={currentMessage}
                 onChange={(e) => setCurrentMessage(e.target.value)}
-                placeholder="Ask about diet substitutions..."
+                placeholder="Ex: Posso substituir 100g de arroz por algo?"
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
               />
               <Button onClick={sendMessage} disabled={isLoading}>
