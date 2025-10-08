@@ -173,7 +173,7 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
   const sections = parseContent(dietPlan)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full overflow-hidden">
       {/* Meals Section */}
       {sections.meals.length > 0 && (
         <div className="space-y-4">
@@ -181,11 +181,11 @@ export default function DietPlanDisplay({ dietPlan }: DietPlanDisplayProps) {
             <ChefHat className="h-5 w-5" />
             Refeições Diárias
           </h3>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
             {sections.meals.map((meal, index) => {
               const IconComponent = meal.icon
               return (
-                <Card key={index} className="border-l-4 border-l-green-500 bg-gray-50">
+                <Card key={index} className="border-l-4 border-l-green-500 bg-gray-50 w-full">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base font-semibold flex items-center gap-2 capitalize">
                       <IconComponent className="w-4 h-4 text-amber-600" />

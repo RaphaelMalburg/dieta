@@ -161,12 +161,12 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-2 sm:p-4">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-green-700">Diet Manager</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">Welcome, {currentUser}</span>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-green-700">Diet Manager</h1>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <span className="text-xs sm:text-sm text-gray-600">Welcome, {currentUser}</span>
             <Button onClick={handleLogout} variant="outline" size="sm">
               <LogOut className="w-4 h-4 mr-2" />
               Logout
@@ -181,7 +181,7 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="tainara" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               {/* Input Section */}
               <Card>
                 <CardHeader>
@@ -229,7 +229,7 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="raphael" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               {/* Input Section */}
               <Card>
                 <CardHeader>
